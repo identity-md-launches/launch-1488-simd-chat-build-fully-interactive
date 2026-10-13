@@ -1,0 +1,8 @@
+1MIND — avisos de terceiros
+
+React e React DOM 19.1.1: licença MIT (react.txt).
+Ícones Lucide 0.468.0: licença ISC (lucide.txt).
+Fonte Manrope, distribuída por @fontsource-variable/manrope 5.2.6: SIL Open Font License 1.1 (manrope.txt).
+
+Os cenários e o rosto dos agentes são SVGs criados para este site. A trilha instrumental é sintetizada localmente com Web Audio; não utiliza gravações de terceiros.
+As orientações de design Better Interface e Impeccable estão creditadas na documentação do repositório, com as respectivas licenças em artifacts/.

@@ -1,0 +1,11 @@
+# Orçamento: 512 bytes; documentado em artifacts/BUDGET.md.
+# Estes padrões de diretório valem em qualquer profundidade.
+node_modules/
+.npm/
+.cache/
+.vite/
+coverage/
+.playwright-mcp/
+test/scratch/
+*.tsbuildinfo
+# dist/ integra a entrega estática e não deve ser ignorado.
