@@ -131,6 +131,14 @@ try {
     assert.ok(a && a.y + a.height < 844);
     const m = await page.locator(".world-scene").boundingBox();
     assert.ok(m && m.y < 500 && m.y + m.height <= 844);
+    assert.equal(
+      await page.locator(".home-intro p").innerText(),
+      "O token do ecossistema IMD para votar em projetos e colecionar agentes.",
+    );
+    assert.match(
+      await page.locator(".home-stats").innerText(),
+      /Liquidez inicial: a definir/,
+    );
     await page.screenshot({
       path: `${out}/inicio-390-${engine}.png`,
       fullPage: true,
@@ -569,6 +577,108 @@ try {
     );
     assert.deepEqual(issues, []);
   });
+  async function fits(locator, container) {
+    const dimensions = await locator.evaluate((el) => ({
+      width: el.clientWidth,
+      scroll: el.scrollWidth,
+    }));
+    assert.ok(
+      dimensions.scroll <= dimensions.width + 1,
+      `Conteúdo excede o elemento: ${JSON.stringify(dimensions)}`,
+    );
+    const box = await locator.boundingBox(),
+      parent = await container.boundingBox();
+    assert.ok(box && parent);
+    assert.ok(box.x >= parent.x - 1 && box.x + box.width <= parent.x + parent.width + 1);
+  }
+  await check("Nome e URL longos cabem na tabela e nos dois diálogos", async () => {
+    const name = "PlataformaComunitariaDeEducacaoAmbiental";
+    const description =
+      "Acesse https://comunidade1mind.example/projetos/educacaoambiental/inscricoes para participar de oficinas abertas à comunidade.";
+    await route("votar");
+    await page.getByRole("button", { name: "Criar projeto", exact: true }).click();
+    await page.getByLabel("Nome do projeto").fill(name);
+    await page.getByLabel("Descrição").fill(description);
+    await page.getByRole("button", { name: "Criar e avaliar projeto" }).click();
+    for (const width of [320, 390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 844 });
+      await route("votar");
+      const row = page.locator(".projects-table tbody tr").filter({ hasText: name });
+      await fits(page.locator("html"), page.locator("html"));
+      for (const selector of [".project-open strong", ".project-description"])
+        await fits(row.locator(selector), row.locator("td").first());
+      assert.equal(await row.locator(".project-open strong").innerText(), name);
+      assert.equal(await row.locator(".project-description").innerText(), description);
+      const nameBox = await row.locator(".project-open strong").boundingBox();
+      const ratingBox = await row.locator(".rate-open").boundingBox();
+      assert.ok(nameBox.x + nameBox.width <= ratingBox.x);
+      await row.locator(".rate-open").click();
+      const dialog = page.getByRole("dialog");
+      await fits(dialog, page.locator("html"));
+      await fits(dialog.locator("h2"), dialog);
+      await fits(dialog.locator(".project-detail"), dialog);
+      assert.equal(await dialog.locator("h2").innerText(), name);
+      assert.equal(await dialog.locator(".project-detail").innerText(), description);
+      const titleBox = await dialog.locator("h2").boundingBox();
+      const closeBox = await dialog.getByRole("button", { name: "Fechar janela" }).boundingBox();
+      assert.ok(titleBox.x + titleBox.width <= closeBox.x);
+      await page.keyboard.press("Escape");
+      await route("inicio");
+      await page.getByRole("button", { name: /Conhecer Agente #47:/ }).click();
+      await page.getByRole("tab", { name: /Projetos/ }).click();
+      await fits(dialog, page.locator("html"));
+      const ranking = dialog.locator(".project-ranking li").filter({ hasText: name });
+      assert.equal(await ranking.count(), 1);
+      await fits(ranking.locator("span").nth(1), ranking);
+      await fits(ranking.locator(".rating"), ranking);
+      const textBox = await ranking.locator("span").nth(1).boundingBox();
+      const scoreBox = await ranking.locator(".rating").boundingBox();
+      assert.ok(textBox.x + textBox.width <= scoreBox.x);
+      await page.keyboard.press("Escape");
+    }
+  });
+  await check("Início usa a liquidez salva, separada da capitalização", async () => {
+    await route("inicio");
+    assert.match(await page.locator(".home-stats").innerText(), /Liquidez inicial: 1\.250 IMD/);
+    assert.match(await page.locator(".home-stats").innerText(), /Capitalização inicial\n2\.500/);
+  });
+  await check("Calculadora mantém valores grandes e fracionários completos a 320 px", async () => {
+    await page.setViewportSize({ width: 320, height: 844 });
+    await route("tokenomics");
+    const input = page.getByLabel("Quantidade antes da taxa");
+    const card = page.locator(".tax-calculator");
+    for (const amount of ["999999999999.9999", "1000000000000", "999999999999.1234"]) {
+      await input.fill(amount);
+      assert.equal(await input.evaluate((el) => el.validity.valid), true);
+      assert.equal(await input.getAttribute("aria-invalid"), "false");
+      await fits(page.locator("html"), page.locator("html"));
+      await fits(card, page.locator("html"));
+      await fits(input, card);
+      await fits(page.locator(".calculator-result > div > strong"), card);
+      for (const value of await page.locator(".calculator-result dd").all())
+        await fits(value, card);
+      if (amount === "999999999999.9999")
+        assert.match(await page.locator(".calculator-result").innerText(), /979\.999\.999\.999,9999 1MIND/);
+    }
+  });
+  await check("Voto desconectado abre a carteira pelo próprio diálogo e pelo teclado", async () => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await route("votar");
+    await page.getByRole("button", { name: "Avaliar Horta do amanhã" }).click();
+    await page.getByRole("button", { name: "Usar carteira" }).click();
+    const dialog = page.getByRole("dialog");
+    assert.equal(await dialog.getByRole("button", { name: "Confirmar avaliação" }).count(), 0);
+    const connect = dialog.getByRole("button", { name: "Conectar carteira", exact: true });
+    await connect.focus();
+    await page.keyboard.press("Enter");
+    await page.getByRole("dialog", { name: "Conecte sua carteira" }).waitFor();
+    assert.equal(await page.locator("dialog[open]").count(), 1);
+    assert.equal(await page.evaluate(() => document.querySelector("dialog").contains(document.activeElement)), true);
+    await page.keyboard.press("Escape");
+    await page.locator("dialog").waitFor({ state: "detached" });
+    assert.equal(await page.locator("dialog").count(), 0);
+    assert.equal(await page.evaluate(() => document.body.style.overflow), "");
+  });
   await check("Nenhum erro JavaScript ou recurso local ausente", async () => {
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);
@@ -696,6 +806,7 @@ try {
         window.__wallet.account = "0x" + "4".repeat(40);
         window.__wallet.emit("accountsChanged", [window.__wallet.account]);
       });
+      await walletPage.locator(".wallet-balances").waitFor({ state: "detached" });
       assert.equal(await walletPage.locator(".wallet-balances").count(), 0);
       assert.match(
         await walletPage.locator(".connected-address").innerText(),
@@ -705,6 +816,36 @@ try {
       assert.ok(!calls.some((c) => /sendTransaction|sign|approve/.test(c)));
     },
   );
+  await check("Voto sem elegibilidade abre consulta; saldo elegível libera confirmação", async () => {
+    await walletPage.keyboard.press("Escape");
+    await walletPage.goto(url + "#votar");
+    await walletPage.getByRole("button", { name: "Avaliar Horta do amanhã" }).click();
+    await walletPage.getByRole("button", { name: "Usar carteira" }).click();
+    let dialog = walletPage.getByRole("dialog");
+    assert.equal(await dialog.getByRole("button", { name: "Confirmar avaliação" }).count(), 0);
+    await dialog.getByRole("button", { name: "Ver elegibilidade" }).click();
+    await walletPage.getByRole("dialog", { name: "Sua carteira" }).waitFor();
+    assert.equal(await walletPage.locator("dialog[open]").count(), 1);
+    await walletPage.getByRole("button", { name: "Atualizar saldos" }).click();
+    await walletPage.getByText(/Saldo insuficiente/).waitFor();
+    await walletPage.keyboard.press("Escape");
+    await walletPage.getByRole("button", { name: "Avaliar Horta do amanhã" }).click();
+    dialog = walletPage.getByRole("dialog");
+    await dialog.getByRole("button", { name: "Ver elegibilidade" }).click();
+    await walletPage.evaluate(() => { window.__wallet.mind = 10n ** 18n; });
+    await walletPage.getByRole("button", { name: "Atualizar saldos" }).click();
+    await walletPage.getByText("Elegível para a demonstração de voto.").waitFor();
+    await walletPage.keyboard.press("Escape");
+    await walletPage.getByRole("button", { name: "Avaliar Horta do amanhã" }).click();
+    await walletPage.getByRole("radio", { name: "5 estrelas", exact: true }).check();
+    await walletPage.getByRole("button", { name: "Confirmar avaliação" }).click();
+    await walletPage.getByRole("button", { name: "Avaliar Horta do amanhã" }).click();
+    assert.match(await walletPage.getByRole("dialog").innerText(), /já avaliou este projeto com 5/);
+    assert.equal(await walletPage.getByRole("button", { name: "Confirmar avaliação" }).count(), 0);
+    const calls = await walletPage.evaluate(() => window.__wallet.calls);
+    assert.ok(!calls.some((c) => /sendTransaction|sign|approve/.test(c)));
+    await walletPage.keyboard.press("Escape");
+  });
   await walletContext.close();
   const corruptContext = await browser.newContext();
   await corruptContext.addInitScript(() => {

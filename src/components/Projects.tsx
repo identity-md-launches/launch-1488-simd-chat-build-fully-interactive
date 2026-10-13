@@ -93,9 +93,8 @@ export default function Projects({
   function vote() {
     if (!project) return;
     if (mode === "wallet" && (!walletAddress || !eligible)) {
-      setError(
-        "Conecte a carteira e consulte um saldo elegível antes de votar.",
-      );
+      setSelected(null);
+      onWallet();
       return;
     }
     try {
@@ -474,8 +473,17 @@ export default function Projects({
                 </p>
               )}
               <button className="button primary full-width" onClick={vote}>
-                Confirmar avaliação
-                <Check size={17} />
+                {mode === "wallet" && (!walletAddress || !eligible) ? (
+                  <>
+                    {walletAddress ? "Ver elegibilidade" : "Conectar carteira"}
+                    <ArrowUpRight size={17} />
+                  </>
+                ) : (
+                  <>
+                    Confirmar avaliação
+                    <Check size={17} />
+                  </>
+                )}
               </button>
             </>
           )}

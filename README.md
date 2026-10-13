@@ -28,7 +28,7 @@ Durante esta execução, as dependências de build foram instaladas em `/tmp/1mi
 
 ## O que funciona
 
-- **Início:** produto e ação principal na primeira tela de 390 px, mapa utilizável, oferta de 1 bilhão, capitalização inicial de 2.500 IMD e taxa de 2% com incentivo de queima.
+- **Início:** produto e ação principal na primeira tela de 390 px, mapa utilizável, utilidade no ecossistema IMD para votar e colecionar agentes, oferta de 1 bilhão, capitalização inicial de 2.500 IMD, liquidez inicial configurada ou “a definir” e taxa de 2% com incentivo de queima.
 - **Tokenomics:** gráfico e descrição de 1% de queima, 0,5% para carteira e 0,5% para staking; simulador da compra com validação de valores.
 - **Explorar:** planeta Aurora, jardim de Gaia e rede de sinapses; nove agentes com a mesma aparência, movimento aleatório, atividades comunitárias e de lazer, pausa, ampliação e ajuda. Ao selecionar um agente ele para, olha para o visitante e abre atributos ou os dez projetos melhor avaliados.
 - **Música:** três composições instrumentais locais, ativação voluntária, troca de faixa e volume. Falhas ao iniciar áudio recebem uma mensagem após quatro segundos; não há reprodução automática.
@@ -71,19 +71,23 @@ O formato e a proporção são validados em `src/lib/rewards.ts`; os registros s
 
 ## Verificações executadas
 
-No export final:
+No export final da revisão de 13/10/2026:
 
 | Verificação                        | Resultado                                                                              |
 | ---------------------------------- | -------------------------------------------------------------------------------------- |
 | `npm run typecheck`                | Passou, sem erros.                                                                     |
 | `npm run build`                    | Passou; export local completo.                                                         |
 | `npm test`                         | 19 testes de domínio, carteira e histórico passaram.                                   |
-| Testes de navegador em Chromium    | 27/27 passaram.                                                                        |
-| Testes de navegador em WebKit      | 27/27 passaram, após instalar bibliotecas do motor somente em `/tmp`.                  |
+| Testes de navegador em Chromium    | 32/32 passaram.                                                                        |
+| Testes de navegador em WebKit      | 32/32 passaram, usando as bibliotecas do motor já disponíveis em `/tmp`.               |
 | axe, seis rotas e modal de agente  | Nenhuma violação nos critérios automatizados WCAG A/AA selecionados, nos dois motores. |
 | Refluxo em 320, 390, 768 e 1440 px | Sem rolagem horizontal nas seis rotas, nos dois motores.                               |
-| Probe `taste@1`, em modo offline   | 16/16 critérios passaram; capturas em 320, 390 e 1440 px.                              |
+| Probe `taste@1`, em modo offline   | 16/16 critérios passaram; medições em 320, 390 e 1440 px e capturas em 390 e 1440 px.    |
 | Recursos/console                   | Sem erro JavaScript ou recurso local ausente nos fluxos principais verificados.        |
+
+Os quatro achados foram reproduzidos antes da alteração, em Chromium e WebKit, e corrigidos sem alterar a integração de carteira ou os parâmetros do token. A revisão cobre nomes e URLs longos na tabela e nos diálogos, a utilidade e a liquidez no Início, o acesso à carteira a partir da votação e valores grandes fracionários na calculadora. As respostas estão em `.imd-responses.json`; medidas anteriores e finais em `artifacts/revision-measurements.json`.
+
+Os testes adicionais usam o texto exato do relato em 320, 390, 768 e 1440 px, verificam a liquidez pendente/configurada e exercitam o voto desconectado, conectado sem saldo elegível e com saldo elegível. A suíte aguarda a conclusão do fechamento de diálogos e da atualização de conta antes de conferir o estado.
 
 Para repetir os testes de navegador em um ambiente com suas bibliotecas de sistema:
 

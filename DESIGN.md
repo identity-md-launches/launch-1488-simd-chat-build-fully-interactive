@@ -45,7 +45,7 @@ Uma família: **Manrope**, fonte variável local em `public/assets/manrope-latin
 
 Corpo com entrelinha 1,6; parágrafos 1,65; títulos em 1,2 e chamada inicial em 1,05 (1,1 no móvel). Títulos usam `text-wrap: balance`; descrições, `pretty`. A chamada de 64 px usa espaçamento `-0.065em`; títulos de página `-0.045em`; títulos pequenos `-0.025em`. O logotipo tem ajuste óptico próprio. Não há rótulos superiores em caixa alta ou espaçamento artificial de letras em texto de leitura.
 
-Inputs usam 16 px, inclusive no celular. Endereços podem quebrar com `overflow-wrap: anywhere`. Avaliações e posições do ranking usam números tabulares. O gráfico e os NFTs não introduzem novas famílias tipográficas. O probe encontrou quatro tamanhos em uso na entrada móvel e cinco na entrada desktop, dentro da escala declarada de seis.
+Inputs usam 16 px, inclusive no celular. Endereços, nomes/descrições de projetos, títulos de modal, textos do ranking e o valor recebido da calculadora podem quebrar com `overflow-wrap: anywhere`. O título de modal e o nome no ranking usam `min-width: 0` para caber na linha flexível sem cortar o texto ou empurrar a avaliação. Avaliações e posições do ranking usam números tabulares. O gráfico e os NFTs não introduzem novas famílias tipográficas. O probe encontrou quatro tamanhos em uso na entrada móvel e cinco na entrada desktop, dentro da escala declarada de seis.
 
 ## Layout e responsividade
 
@@ -59,6 +59,8 @@ Inputs usam 16 px, inclusive no celular. Endereços podem quebrar com `overflow-
 - **Acima de 1.500 px:** ajuste da proporção do mapa para 1,9:1, mantendo o limite de largura da página.
 
 Na primeira tela de 390 × 844 px, título, descrição, ação “Explorar o enxame” e os nove agentes aparecem. O export foi verificado em 320, 390, 768 e 1440 px nos seis destinos, em Chromium e WebKit, sem rolagem horizontal. O campo de busca precede a tabela; ordenação e elegibilidade ficam junto às ações que alteram. O histórico mantém seus controles acima dos resultados.
+
+O resumo do Início mantém “Capitalização inicial” e, abaixo do valor, informa “Liquidez inicial: a definir” ou o valor configurado em IMD, com a tipografia compacta existente. A introdução explica a utilidade do token no ecossistema IMD. Na calculadora móvel (até 720 px), a coluna usa `minmax(0, 1fr)`; seus filhos têm `min-width: 0`. Valores fracionários próximos de 1 trilhão quebram em linhas mantendo a fonte de 28 px e o valor completo.
 
 ## Superfícies e profundidade
 
@@ -85,6 +87,8 @@ Raio principal de 16 px; botões 9 px; campos e controles de ícone 8 px; painé
 | Carteira e avisos                      | `src/App.tsx`, `src/lib/wallet.ts` | Estado em andamento, rejeição, rede errada, erro recuperável e saldos. Respostas antigas são invalidadas ao mudar conta/rede. Notificação persistente com `role="status"` e botão para dispensar.                                              |
 
 Ícones Lucide usam `currentColor` e um conjunto consistente. Os alvos passam pelo mínimo de 24 px ou pela exceção de espaçamento; botões principais têm 46 px de altura. O probe registrou 11 controles abaixo do conforto de 44 px na entrada móvel, sobretudo controles compactos do mapa e links; isso é documentado, não declarado como 44 px em toda a página.
+
+No modo “Usar carteira” do modal de projeto, a ação principal mostra “Conectar carteira” enquanto não há endereço e “Ver elegibilidade” enquanto o saldo não é elegível. Ambas fecham o projeto e abrem o painel de carteira existente. “Confirmar avaliação” aparece para uma carteira elegível ou no modo demonstrativo; um voto já registrado mantém a confirmação de participação.
 
 O foco usa contorno visível de 2 px; as abas do modal têm setas, Home/End e tabindex móvel. A mudança de rota foca `main` sem deslocar o cabeçalho. Erros usam `role="alert"`; confirmações, uma região de status. O movimento começa pausado quando o sistema pede redução de movimento; essa preferência também remove transições e animações. Hover da arte é limitado a dispositivos com hover. A música começa desligada.
 

@@ -358,8 +358,8 @@ export default function App() {
                   <span>Infinitos mundos.</span>
                 </h1>
                 <p>
-                  O token que conecta agentes de IA e uma comunidade de
-                  criadores.
+                  O token do ecossistema IMD para votar em projetos e colecionar
+                  agentes.
                 </p>
               </div>
               <div className="hero-action">
@@ -466,6 +466,12 @@ export default function App() {
                   <strong>
                     2.500 <small>IMD</small>
                   </strong>
+                  <span>
+                    Liquidez inicial:{" "}
+                    {config.initialLiquidity
+                      ? `${Number(config.initialLiquidity).toLocaleString("pt-BR")} IMD`
+                      : "a definir"}
+                  </span>
                 </div>
               </div>
               <div>

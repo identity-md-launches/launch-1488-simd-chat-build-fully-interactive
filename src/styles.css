@@ -1074,6 +1074,8 @@ main:focus {
 .modal-heading h2 {
   font-size: var(--font-heading);
   max-width: 95%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .modal-heading .icon-button {
   margin-inline-end: -9px;
@@ -1186,6 +1188,8 @@ main:focus {
 }
 .project-ranking li > span:nth-child(2) {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .rank-number {
   color: var(--muted);
@@ -1495,12 +1499,14 @@ input[type="datetime-local"] {
 .project-open strong {
   font-size: var(--font-body);
   display: block;
+  overflow-wrap: anywhere;
 }
 .project-open:hover strong {
   color: var(--accent);
 }
 .project-description {
   display: block;
+  overflow-wrap: anywhere;
   font-size: var(--font-small);
   color: var(--muted);
   margin-top: 7px;
@@ -1611,6 +1617,7 @@ input[type="datetime-local"] {
 .project-detail {
   margin: 20px 0;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 .vote-summary {
   display: flex;
@@ -1844,6 +1851,9 @@ input[type="datetime-local"] {
 .tax-calculator > div > p {
   margin-top: 10px;
 }
+.tax-calculator > div {
+  min-width: 0;
+}
 .tax-calculator label {
   margin-top: 24px;
   max-width: 360px;
@@ -1862,6 +1872,7 @@ input[type="datetime-local"] {
   font-size: var(--font-title);
   color: var(--accent);
   letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
 }
 .calculator-result small {
   color: var(--muted);
@@ -3269,7 +3280,7 @@ input[type="datetime-local"] {
     border-radius: 9px;
   }
   .tax-calculator {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 28px;
     padding: 25px;
   }
